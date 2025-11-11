@@ -1,0 +1,2 @@
+device = torch_npu.npu.set_device();
+

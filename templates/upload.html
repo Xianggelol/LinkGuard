@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>LinkGuard - Fight against phishing</title>
+    <!-- Include html5-qrcode library -->
+    <script src="{{ url_for('static', filename='html5-qrcode.min.js') }}" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub-heading {
+            text-align: center;
+            color: #555;
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        #qr-reader {
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        #qr-reader img[alt="Info icon"] {
+            display: none;
+        }
+
+        #qr-reader-results .result,
+        #manual-url-results .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .result-benign {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .result-malicious {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .upload-section, .manual-url-section {
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .education-corner {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e7f3fe;
+            border: 1px solid #b6d4fe;
+            border-radius: 8px;
+        }
+
+        .education-corner h2 {
+            color: #084298;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .education-corner ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .education-corner li {
+            margin-bottom: 10px;
+            color: #084298;
+        }
+
+        .education-corner a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .education-corner a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .left-panel, .right-panel {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LinkGuard</h1>
+        <h2 class="sub-heading">- Fight against phishing -</h2>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <p class="sub-heading">Scan a QR Code with Your Camera</p>
+                <div id="qr-reader"></div>
+                <div id="qr-reader-results"></div>
+            </div>
+
+            <div class="right-panel">
+                <div class="upload-section">
+                    <h2>Or Upload a Screen Capture</h2>
+                    {% if error %}
+                    <p style="color:red;">{{ error }}</p>
+                    {% endif %}
+                    <form action="/upload" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" required>
+                        <br><br>
+                        <input type="submit" value="Upload and Analyze">
+                    </form>
+                </div>
+
+                <div class="manual-url-section">
+                    <h2>Or Enter a URL Manually</h2>
+                    <form id="url-form">
+                        <input type="text" id="url" name="url" required placeholder="https://example.com" style="width: 80%; padding: 8px;">
+                        <br><br>
+                        <input type="submit" value="Classify URL">
+                    </form>
+                    <div id="manual-url-results"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education Corner -->
+        <div class="education-corner">
+            <h2>Anti-Phishing Education Corner</h2>
+            <ul>
+                <li>Phishing attacks are one of the most common cyber threats, where attackers impersonate legitimate
+                    entities to steal sensitive information.</li>
+                <li>Always verify the URL carefully before entering any personal information or credentials.</li>
+                <li>Be cautious of unexpected requests for personal information, even if they appear to come from known
+                    sources.</li>
+                <li>Watch out for urgency or threats in messages - these are common phishing tactics.</li>
+                <li>When in doubt, directly contact the organization through official channels rather than clicking on
+                    links.</li>
+            </ul>
+            <p style="margin-top: 15px;">
+                <a href="https://www.hkcert.org/publications/all-out-anti-phishing" target="_blank"
+                    rel="noopener noreferrer">
+                    Learn more about phishing prevention from HKCERT →
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`Code matched = ${decodedText}`, decodedResult);
+            // Send the decoded URL to the backend for prediction
+            fetch('/api/predict_url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: decodedText }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('qr-reader-results');
+                    let resultClass = data.prediction === 'malicious' ? 'result-malicious' : 'result-benign';
+                    resultsDiv.innerHTML = `
+                    <div class="result ${resultClass}">
+                        <p><strong>Scanned URL:</strong> ${data.prediction === 'malicious' ? '[Link hidden for safety]' : decodedText}</p>
+                        <p><strong>Prediction:</strong> ${data.prediction}</p>
+                        <p><strong>Confidence:</strong> Benign: ${data.probabilities.benign.toFixed(4)}, Malicious: ${data.probabilities.malicious.toFixed(4)}</p>
+                    </div>
+                `;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const resultsDiv = document.getElementById('qr-reader-results');
+                    resultsDiv.innerHTML = `<p style="color:red;">Error processing QR code.</p>`;
+                });
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "qr-reader",
+            {
+                fps: 10,
+                qrbox: 250,
+                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+            });
+        html5QrcodeScanner.render(onScanSuccess);
+
+        document.getElementById('url-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const url = document.getElementById('url').value;
+            fetch('/api/predict_url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('manual-url-results');
+                    let resultClass = data.prediction === 'malicious' ? 'result-malicious' : 'result-benign';
+                    resultsDiv.innerHTML = `
+                <div class="result ${resultClass}">
+                    <p><strong>Submitted URL:</strong> ${data.prediction === 'malicious' ? '[Link hidden for safety]' : url}</p>
+                    <p><strong>Prediction:</strong> ${data.prediction}</p>
+                    <p><strong>Confidence:</strong> Benign: ${data.probabilities.benign.toFixed(4)}, Malicious: ${data.probabilities.malicious.toFixed(4)}</p>
+                </div>
+            `;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const resultsDiv = document.getElementById('manual-url-results');
+                    resultsDiv.innerHTML = `<p style="color:red;">Error processing URL.</p>`;
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+numpy==1.24.1
+pandas==2.0.3
+seaborn==0.13.1
+#tokenizers==0.14.1
+#transformers==4.36.2
+tqdm==4.65.0
+fastapi
+uvicorn[standard]
+
+#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#pip install pytorch_pretrained_bert
+#torch==2.0.0+cu118
+#torchaudio==2.0.1+cu118
+#torchvision==0.15.1+cu118

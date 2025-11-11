@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>LinkGuard - Fight against phishing</title>
+    <!-- Include html5-qrcode library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 0.5rem; /* Adjust spacing if adding a sub-heading */
+        }
+
+        /* New style for sub-heading */
+        .sub-heading {
+            text-align: center;
+            color: #555;
+            font-size: 1.2rem; /* Smaller than h1 */
+            margin-top: 0;
+            margin-bottom: 1.5rem; /* Space below sub-heading */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 4px;
+        }
+
+        .result p {
+            margin: 5px 0;
+        }
+
+        .result .label {
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* New styles for result box colors */
+        .result-benign {
+            background-color: #d4edda;
+            /* Light green */
+            border-color: #c3e6cb;
+            color: #155724;
+            /* Dark green text */
+        }
+
+        .result-malicious {
+            background-color: #f8d7da;
+            /* Light red */
+            border-color: #f5c6cb;
+            color: #721c24;
+            /* Dark red text */
+        }
+
+        .result-default {
+            background-color: #e9ecef;
+            /* Original light grey */
+            border-color: #eee;
+            color: #333;
+            /* Default text color */
+        }
+
+        /* Style for the static title box */
+        .result-title-box {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            /* A neutral background */
+            border: 1px solid #dee2e6;
+            /* border-bottom: none; */
+            /* Remove this if you want a full border around title */
+            border-radius: 4px;
+            /* Rounded all corners for the title box */
+            text-align: center;
+            /* Center the title */
+        }
+
+        .result-title-box h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            /* Adjust size as needed */
+        }
+
+        /* Adjust result content box for stacking */
+        .result-content-box {
+            margin-top: 10px;
+            /* Add some space between title and content box */
+            /* border-top-left-radius: 0; */
+            /* Not needed if title box is separate */
+            /* border-top-right-radius: 0; */
+            /* Not needed if title box is separate */
+            text-align: center;
+            /* Center the content within this box */
+        }
+
+        .prediction-summary-message {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .prediction-reference-container {
+            /* New class for the reference section */
+            text-align: left;
+            /* Override centering for this section */
+            display: inline-block;
+            /* Allows centering of the block itself if needed, while keeping text left-aligned */
+            margin-top: 10px;
+        }
+
+        .prediction-reference-title {
+            font-weight: bold;
+            /* margin-top: 10px; */
+            /* Adjusted by new container */
+            margin-bottom: 5px;
+        }
+
+        .url-display {
+            margin-top: 15px;
+            /* Space above the URL display */
+            word-wrap: break-word;
+            /* Ensure long URLs wrap */
+        }
+
+        .url-display .label {
+            font-weight: bold;
+            display: block;
+            /* Make label and URL stack vertically */
+            margin-bottom: 5px;
+            /* Space between label and URL */
+        }
+
+        /* Add new styles for education corner */
+        .education-corner {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e7f3fe;
+            border: 1px solid #b6d4fe;
+            border-radius: 8px;
+        }
+
+        .education-corner h2 {
+            color: #084298;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .education-corner ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .education-corner li {
+            margin-bottom: 10px;
+            color: #084298;
+        }
+
+        .education-corner a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .education-corner a:hover {
+            text-decoration: underline;
+        }
+
+        /* QR Scanner Styles */
+        #qr-reader-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        #qr-reader {
+            width: 100%; 
+            max-width: 400px; /* Adjust as needed */
+            margin: 0 auto 10px auto; /* Center the reader */
+            border: 1px solid #ccc;
+        }
+        #qr-reader__status_span > a { display: none; } /* Optional: Hide library's link */
+        .qr-buttons button {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .qr-buttons button:hover {
+            background-color: #5a6268;
+        }
+        #qrStatus {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LinkGuard</h1>
+        <h2 class="sub-heading">- Fight against phishing -</h2>
+
+        <!-- QR Code Scanner Section -->
+        <div id="qr-reader-container">
+            <h2 style="text-align: center; margin-bottom: 10px;">Scan QR Code</h2>
+            <div id="qr-reader"></div>
+            <div class="qr-buttons" style="text-align: center;">
+                <button id="startScanButton">Start QR Scan</button>
+                <button id="stopScanButton" style="display:none;">Stop QR Scan</button>
+            </div>
+            <p id="qrStatus">QR Scanner is idle.</p>
+        </div>
+
+        <form action="{{ url_for('gui_predict') }}" method="post">
+            <label for="url">Enter URL (or scan QR):</label>
+            <input type="text" id="url" name="url" required>
+            <input type="submit" value="Classify URL">
+        </form>
+
+        {% if prediction_result %}
+        {% set result_class = 'result-default' %}
+        {% set summary_message = '' %}
+
+        {% if prediction_result.error %}
+        {% set result_class = 'result-malicious' %} {# Or your preferred error color class #}
+        {% set summary_message = prediction_result.error %}
+        {% elif prediction_result.prediction %}
+        {% if prediction_result.prediction.lower() == 'benign' %}
+        {% set result_class = 'result-benign' %}
+        {% set summary_message = 'The URL is legitimate. You are good to go.' %}
+        {% else %}
+        {% set result_class = 'result-malicious' %}
+        {% set summary_message = 'Warning: This URL is potentially ' + prediction_result.prediction + '.' %}
+        {% endif %}
+        {% endif %}
+
+        <div class="result-title-box">
+            <h2>Prediction Result</h2>
+        </div>
+
+        {% if summary_message %} {# Only show content box if there's something to display #}
+        <div class="result result-content-box {{ result_class }}">
+            <p class="prediction-summary-message">{{ summary_message }}</p>
+
+            {# Displaying the URL based on prediction type #}
+            {% if prediction_result.url %}
+            <div class="url-display">
+                <p><span class="label">Processed URL:</span>
+                    {% if prediction_result.prediction.lower() == 'benign' %}
+                    <a href="{{ prediction_result.url }}" target="_blank" rel="noopener noreferrer">{{
+                        prediction_result.url }}</a>
+                    {% else %}
+                    {# Expecting 'display_url' from backend for malicious cases #}
+                    {{ prediction_result.display_url if prediction_result.display_url else prediction_result.url[:20] +
+                    '...' + prediction_result.url[-20:] }}
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+
+            {# THIS IS THE SECTION THAT DISPLAYS THE CONFIDENCE SCORE #}
+            {% if prediction_result.probabilities and prediction_result.prediction %}
+            <div class="confidence-score" style="margin-top: 10px;">
+                <p><span class="label">Confidence:</span> 
+                {{ "%.2f"|format(prediction_result.probabilities[prediction_result.prediction] * 100) }}% 
+                ({{ prediction_result.prediction }})
+                </p>
+            </div>
+            {% endif %}
+            {# END OF CONFIDENCE SCORE SECTION #}
+            
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <div class="education-corner">
+            <h2>Anti-Phishing Education Corner</h2>
+            <ul>
+                <li>Phishing attacks are one of the most common cyber threats, where attackers impersonate legitimate entities to steal sensitive information.</li>
+                <li>Always verify the URL carefully before entering any personal information or credentials.</li>
+                <li>Be cautious of unexpected requests for personal information, even if they appear to come from known sources.</li>
+                <li>Watch out for urgency or threats in messages - these are common phishing tactics.</li>
+                <li>When in doubt, directly contact the organization through official channels rather than clicking on links.</li>
+            </ul>
+            <p style="margin-top: 15px;">
+                <a href="https://www.hkcert.org/publications/all-out-anti-phishing" target="_blank" rel="noopener noreferrer">
+                    Learn more about phishing prevention from HKCERT →
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const urlInputElement = document.getElementById('url'); // Target the existing URL input
+        const qrReaderElement = document.getElementById('qr-reader');
+        const qrStatusElement = document.getElementById('qrStatus');
+        const startScanButton = document.getElementById('startScanButton');
+        const stopScanButton = document.getElementById('stopScanButton');
+
+        let html5QrCode = null;
+
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`Code matched = ${decodedText}`, decodedResult);
+            urlInputElement.value = decodedText; // Populate the main URL input field
+            qrStatusElement.textContent = `Scanned: ${decodedText.substring(0,30)}...`;
+            stopQrScanner();
+            // Automatically submit the form
+            document.querySelector('form').submit(); 
+        }
+
+        function onScanFailure(error) {
+            // You can log scan failures if needed, but often it's best to let it continue scanning
+            // console.warn(`QR Code scan error: ${error}`);
+        }
+
+        function startQrScanner() {
+            if (!html5QrCode) {
+                 html5QrCode = new Html5Qrcode("qr-reader");
+            }
+            
+            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }; 
+
+            // First attempt: environment-facing camera (rear camera)
+            const firstTryConstraints = { facingMode: "environment" };
+
+            html5QrCode.start(firstTryConstraints, config, onScanSuccess, onScanFailure)
+                .then(() => {
+                    qrStatusElement.textContent = "Scanning for QR code...";
+                    startScanButton.style.display = 'none';
+                    stopScanButton.style.display = 'inline-block';
+                })
+                .catch(err => {
+                    qrStatusElement.textContent = `Rear camera error: ${err.name}. Trying front camera...`;
+                    console.warn("Error starting QR scanner with rear camera: ", err);
+                    
+                    // Second attempt: user-facing camera (front camera) if rear fails
+                    const secondTryConstraints = { facingMode: "user" };
+                    html5QrCode.start(secondTryConstraints, config, onScanSuccess, onScanFailure)
+                        .then(() => {
+                            qrStatusElement.textContent = "Scanning for QR code (using front camera)...";
+                            startScanButton.style.display = 'none';
+                            stopScanButton.style.display = 'inline-block';
+                        })
+                        .catch(err_front => {
+                            qrStatusElement.textContent = `Front camera error: ${err_front.name}. Trying any camera...`;
+                            console.warn("Error starting QR scanner with front camera: ", err_front);
+
+                            // Third attempt: no specific facingMode, let the browser/OS decide
+                            // This is often needed for desktop or if facingMode is not well supported.
+                            // We pass an empty object for constraints, but the library might pick a default camera.
+                            // However, to avoid the "0 keys" error, we should ensure *some* constraint if possible,
+                            // or rely on the library's internal default if it has one that doesn't require explicit keys.
+                            // A safer approach for a generic fallback if specific facingModes fail:
+                            Html5Qrcode.getCameras().then(cameras => {
+                                if (cameras && cameras.length) {
+                                    let cameraId = cameras[0].id; // Use the first available camera
+                                    if (cameras.length > 1) { // Prefer rear if multiple and one is 'environment'
+                                        const rearCamera = cameras.find(camera => camera.label.toLowerCase().includes('back') || camera.label.toLowerCase().includes('rear') || (camera.facingMode && camera.facingMode.toLowerCase() === 'environment'));
+                                        if (rearCamera) cameraId = rearCamera.id;
+                                    }
+                                    html5QrCode.start(cameraId, config, onScanSuccess, onScanFailure)
+                                    .then(() => {
+                                        qrStatusElement.textContent = "Scanning for QR code (using available camera)...";
+                                        startScanButton.style.display = 'none';
+                                        stopScanButton.style.display = 'inline-block';
+                                    })
+                                    .catch(err_any => {
+                                        qrStatusElement.textContent = `Error starting any camera: ${err_any.name}`;
+                                        console.error("Error starting any camera: ", err_any);
+                                    });
+                                } else {
+                                    qrStatusElement.textContent = "No cameras found.";
+                                    console.error("No cameras found.");
+                                }
+                            }).catch(err_get_cam => {
+                                qrStatusElement.textContent = `Error getting camera list: ${err_get_cam.name}`;
+                                console.error("Error getting cameras: ", err_get_cam);
+                            });
+                        });
+                });
+        }
+
+        function stopQrScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop()
+                    .then(() => {
+                        qrStatusElement.textContent = "QR Scanner stopped.";
+                        startScanButton.style.display = 'inline-block';
+                        stopScanButton.style.display = 'none';
+                    })
+                    .catch(err => {
+                        qrStatusElement.textContent = `Error stopping scanner: ${err}`;
+                        console.error("Error stopping QR scanner", err);
+                    });
+            } else {
+                qrStatusElement.textContent = "QR Scanner is idle.";
+                startScanButton.style.display = 'inline-block';
+                stopScanButton.style.display = 'none';
+            }
+        }
+
+        // Event listeners for buttons
+        startScanButton.addEventListener('click', startQrScanner);
+        stopScanButton.addEventListener('click', stopQrScanner);
+
+    </script>
+</body>
+</html>
